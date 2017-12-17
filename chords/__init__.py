@@ -5,7 +5,7 @@ from pathlib import Path
 
 # TODO
 # - some mechanism for ordering...
-#   - before / after lists ?
+#   - project level ordering overrides / additions?
 
 
 def discover():
@@ -46,4 +46,4 @@ def discover():
                 result.append(name)
                 found.pop(name)
 
-    return result
+    return ['chords.plugins.' + name for name in result]
