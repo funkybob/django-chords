@@ -29,3 +29,8 @@ Make your plugin have the following directory structure:
 
 Note the absence of __init__.py files in the top level directories. These will
 be treated as "namespace packages".
+
+If your chord must be installed before or after a particular plugin, you can
+list these in the module's __init__.py as `include_before` and `include_after`.
+When generating the discovered list, chords will resolve the dependencies for
+you.

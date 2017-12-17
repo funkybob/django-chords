@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from importlib import import_module
 from pathlib import Path
 
@@ -15,7 +16,7 @@ def discover():
     '''
     from chords import plugins
 
-    FOUND = []
+    found = OrderedDict()
 
     for path in plugins.__paths__:
         root = Path(path)
@@ -24,10 +25,25 @@ def discover():
                 continue
             name = str(child).replace('/', '.')
             try:
-                import_module(name, package='chords.plugins')
+                chord = import_module(name, package='chords.plugins')
             except ImportError:
                 continue
             else:
-                FOUND.append('chords.plugins.' + name)
+                found[name] = (
+                    set(getattr(chord, 'include_before', ())),
+                    set(getattr(chord, 'include_after', ())),
+                )
 
-    return FOUND
+    # Turn 'before' clauses into 'after' clauses
+    for name, (before, after) in found.items():
+        for dep in before.intersection(found):
+            found[dep][1].add(name)
+
+    result = []
+    while found:
+        for name, (before, after) in found.items():
+            if after.difference(found).issubset(result):
+                result.append(name)
+                found.pop(name)
+
+    return result
