@@ -2,6 +2,8 @@ from collections import OrderedDict
 from importlib import import_module
 from pathlib import Path
 
+from django import apps
+from django.urls import path, include
 
 # TODO
 # - some mechanism for ordering...
@@ -47,3 +49,22 @@ def discover():
                 found.pop(name)
 
     return ['chords.plugins.' + name for name in result]
+
+
+def auto_urls():
+    '''
+    Build a URL patterns tree from any App with url_prefix set on its AppConfig
+    '''
+    urlpatterns = []
+
+    for app in apps.get_app_configs():
+        try:
+            urlpatterns.append(
+                path(
+                    app.url_prefix,
+                    include('{}.urls'.format(app.label))
+                )
+            )
+        except AttributeError:
+            pass
+    return urlpatterns
